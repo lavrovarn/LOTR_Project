@@ -3,6 +3,19 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#files
+etc/
+Include/
+lotr-env/
+movie_transcripts/
+Scripts/
+share/
+characters_list.csv
+characters.csv
+lord_of_rings_comminities.html
+lord_of_rings.html
+
+
 # C extensions
 *.so
 
