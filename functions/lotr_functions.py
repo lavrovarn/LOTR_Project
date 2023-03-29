@@ -15,7 +15,76 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
 
-def download_characters_from_web(page_urls):
+
+
+
+def download_characters_from_web(page_url):
+    # Create driver
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    actions = ActionChains(driver)
+     
+    # list with character's key, name and url to his website
+    characters_list = [] 
+    # list with book's key and name 
+    books_list=[] 
+    # pivot-Table with book key and character key
+    book_character_list=[] 
+    #book key 
+    book_index=0
+    # character kex for all books
+    character_index=0
+
+    driver.get(page_url)
+
+    #find div with characters 
+    table_with_characters=driver.find_element(By.CLASS_NAME, 'mw-category')
+
+    #find all characters inside of div with characters 
+    character_elements=table_with_characters.find_elements(By.TAG_NAME, 'a')
+
+    #save character
+    for character in character_elements:
+        character_url=character.get_attribute('href')
+        character_name=character.text
+        if "(" in character_name or ")" in character_name: 
+            character_name=re.sub("[\(\[].*?[\)\]]", "", character_name)
+
+        #get other names 
+
+        # Open a new window
+        driver.execute_script("window.open('');")
+
+        # Switch to the new window and open new URL
+        driver.switch_to.window(driver.window_handles[1])
+        driver.get(character_url)
+
+        try:
+            other_names_section_header=driver.find_element(By.XPATH, "//td[contains(text(),'names')]")
+            other_names_section_parent=other_names_section_header.find_element(By.XPATH, "..")
+            other_names_section=other_names_section_parent.find_element(By.XPATH, ".//td[contains(text(),'names')=false]")
+            other_names=other_names_section.text.split("\n")
+            other_names=[other_name for other_name in other_names if 'below' not in other_name]
+            other_names= [re.sub("[\(\[].*?[\)\]]", "", other_name) for other_name in other_names]
+            other_names= [other_name.replace('\"','') for other_name in other_names]
+        except NoSuchElementException:
+            other_names=[]
+        # Closing new_url tab
+        driver.close()
+
+        # Switching to old tab
+        driver.switch_to.window(driver.window_handles[0])        
+
+        characters_list.append({"character_key": character_index, "character_name": character_name, "character_firstname":character_name.split(' ', 1)[0], "other_names": other_names, "character_url": character_url})
+        character_index=character_index+1
+
+    driver.close()
+    characters_list_df=pd.DataFrame(characters_list)
+    return characters_list_df
+
+
+
+
+def download_characters_from_web_old(page_urls):
     # Create driver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     actions = ActionChains(driver)
