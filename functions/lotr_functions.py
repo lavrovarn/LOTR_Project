@@ -18,7 +18,7 @@ from selenium.common.exceptions import NoSuchElementException
 
 
 
-def download_characters_from_web(page_url):
+def download_characters_from_another_site(page_url):
     # Create driver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     actions = ActionChains(driver)
