@@ -54,7 +54,12 @@ You can download the html-file here: [Network](https://github.com/lavrovarn/LOTR
 
 Based on the degree centrality values, we can draw several insights about the characters' importance within the network:
 
+**Highest Degree Centrality**
+
 ![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/degree_centrality_desc.png "Highest Degree Centrality") 
+
+**Lowest Degree Centrality**
+
 ![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/degree_centrality_acs.png "Lowest Degree Centrality") 
 
 1. **Frodo Baggins** and **Gandalf** have the highest degree centrality, indicating that they are the most central characters in terms of relationships with other characters. This suggests that they play significant roles and have strong connections with various characters throughout the story.
