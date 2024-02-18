@@ -18,15 +18,10 @@ The project comprises several key steps:
 -  [Category:Characters in The Lord of the Rings
 ](https://tolkiengateway.net/wiki/Category:Characters_in_The_Lord_of_the_Rings)
 Because many characters have multiple names, for example Aragorn is also known as Strider and Elessar, I also stored the other names from the personal page of each character. Some characters don't appear in the movies, so I compared the characters from the films with a list of characters from tolkiengateway.net to ensure that all unique characters were included in the dataset.
-
 2. Relationship Extraction: Analyzing the text of the trilogy to extract relationships between characters based on their co-occurrence and interactions.
-
 3. Network Visualization: Constructing a graphical representation of the character network using NetworkX, allowing for intuitive visualization of character connections.
-
 4. Community Detection: Employing community detection algorithms to identify cohesive groups of characters within the network.
-
 5. Character Importance Analysis: Assessing the importance and evolution of characters throughout the series based on metrics such as degree centrality.
-
 6. Word Cloud Generation: Creating word clouds to visually represent the most prominent themes and topics in each book.
 
 ## Methodology
