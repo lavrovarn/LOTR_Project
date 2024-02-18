@@ -1,14 +1,14 @@
-#The Lord of the Rings - Relationships between Characters
-##Introduction
+# The Lord of the Rings - Relationships between Characters
+## Introduction
 In this project, I delve into the intricate network of relationships between characters in J.R.R. Tolkien's epic fantasy trilogy, "The Lord of the Rings." Utilizing various data analysis techniques and Python libraries, I aim to uncover the dynamics and significance of these relationships throughout the series.
 
 _This project was developed using Jupyter Notebook_
 
 
-##Acknowledgements
+## Acknowledgements
 I would like to express my gratitude to [Thu Vu Data Analytics](https://www.youtube.com/@Thuvu5) for her insightful videos on analyzing character relationships in the Witcher universe. Their work served as inspiration and provided valuable insights that guided the approach taken in this project.
 
-##Project Overview
+## Project Overview
 The project comprises several key steps:
 
 1. Data Collection: Scraping character data from "The Lord of the Rings" movies and books from reputable sources. 
@@ -25,10 +25,10 @@ Because many characters have multiple names, for example Aragorn is also known a
 5. Character Importance Analysis: Assessing the importance and evolution of characters throughout the series based on metrics such as degree centrality.
 6. Word Cloud Generation: Creating word clouds to visually represent the most prominent themes and topics in each book.
 
-##Methodology
+## Methodology
 I scraped character data from multiple sources, ensuring comprehensive coverage of characters across movies and books. Using Spacy's Named Entity Recognition (NER), I identified character mentions in the text and established relationships based on their frequency of co-occurrence. The constructed network graph visualized character connections, while community detection algorithms revealed groups of characters with strong internal ties. Analyzing character importance over time provided insights into their roles and contributions to the narrative, while word clouds highlighted recurring themes and concepts in each book.
 
-##Used Technologies
+## Used Technologies
 ..* **Selenium**: Utilized for web scraping character data from online sources such as lotr.fandom.com and tolkiengateway.net.
 ..* **Spacy**: Employed for Named Entity Recognition (NER) to extract character mentions from the text of the books.
 ..* **NetworkX**: Used for constructing and visualizing the character network graph, allowing for intuitive exploration of character connections and relationships.
@@ -37,7 +37,7 @@ I scraped character data from multiple sources, ensuring comprehensive coverage 
 ..* **Matplotlib** and **Pyvis Network**: Employed for visualizing graphs and networks, providing interactive and static representations of character relationships and communities.
 
 ## Results 
-###Graph
+### Graph
 To make the graph more readable, I decided to limit the number of nodes by only including the first 150 rows of the dataset. The dataset was also filtered by the value of the relationships in descending order, so that only the most significant relationships were included in the graph.
 
 Here is the result: 
@@ -45,7 +45,7 @@ Here is the result:
 
 The visualizations generated using pandas can be challenging to interpret, particularly when attempting to identify dependencies between characters. Therefore, to address this limitation and create more intuitive network visualizations, I opted to utilize Pyvis Network, a powerful tool specifically designed for network analysis and visualization.
 
-###Network 
+### Network 
 
 Here is the link to dynamic graphs visualisation: [Network](https://tolkiengateway.net/wiki/Category:Characters_in_The_Lord_of_the_Rings)
 
@@ -68,7 +68,7 @@ Based on the degree centrality values, we can draw several insights about the ch
 6. Some characters have very low degree centrality values, such as **Rosie Cotton**, **Ted Sandyman**, **Radagast**, **Lotho Sackville-Baggins**, **Imrahil**, **Nazgûl**, **Glorfindel**, **Arathorn**, **Éomund**, **Damrod**, **Mablung (ranger of Ithilien)**, **Warden of the Houses of Healing**, **Thengel**, **Elladan**, **Elrohir**, and **Barliman Butterbur**. These characters likely have minor roles and limited interactions with other characters in the network.
 
 
-###Communities
+### Communities
 I used communities to identify groups of characters within the network who share common characteristics or have similar roles or relationships in the story.  I used the community_louvain package to identify the communities within the LOTR character network. 
 
 Here is the link to dynamic graphs visualisation: [Communities Network](https://tolkiengateway.net/wiki/Category:Characters_in_The_Lord_of_the_Rings)
