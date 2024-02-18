@@ -1,0 +1,492 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script>function neighbourhoodHighlight(params) {
+  // console.log("in nieghbourhoodhighlight");
+  allNodes = nodes.get({ returnType: "Object" });
+  // originalNodes = JSON.parse(JSON.stringify(allNodes));
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    highlightActive = true;
+    var i, j;
+    var selectedNode = params.nodes[0];
+    var degrees = 2;
+
+    // mark all nodes as hard to read.
+    for (let nodeId in allNodes) {
+      // nodeColors[nodeId] = allNodes[nodeId].color;
+      allNodes[nodeId].color = "rgba(200,200,200,0.5)";
+      if (allNodes[nodeId].hiddenLabel === undefined) {
+        allNodes[nodeId].hiddenLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+    var connectedNodes = network.getConnectedNodes(selectedNode);
+    var allConnectedNodes = [];
+
+    // get the second degree nodes
+    for (i = 1; i < degrees; i++) {
+      for (j = 0; j < connectedNodes.length; j++) {
+        allConnectedNodes = allConnectedNodes.concat(
+          network.getConnectedNodes(connectedNodes[j])
+        );
+      }
+    }
+
+    // all second degree nodes get a different color and their label back
+    for (i = 0; i < allConnectedNodes.length; i++) {
+      // allNodes[allConnectedNodes[i]].color = "pink";
+      allNodes[allConnectedNodes[i]].color = "rgba(150,150,150,0.75)";
+      if (allNodes[allConnectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[allConnectedNodes[i]].label =
+          allNodes[allConnectedNodes[i]].hiddenLabel;
+        allNodes[allConnectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // all first degree nodes get their own color and their label back
+    for (i = 0; i < connectedNodes.length; i++) {
+      // allNodes[connectedNodes[i]].color = undefined;
+      allNodes[connectedNodes[i]].color = nodeColors[connectedNodes[i]];
+      if (allNodes[connectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[connectedNodes[i]].label =
+          allNodes[connectedNodes[i]].hiddenLabel;
+        allNodes[connectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // the main node gets its own color and its label back.
+    // allNodes[selectedNode].color = undefined;
+    allNodes[selectedNode].color = nodeColors[selectedNode];
+    if (allNodes[selectedNode].hiddenLabel !== undefined) {
+      allNodes[selectedNode].label = allNodes[selectedNode].hiddenLabel;
+      allNodes[selectedNode].hiddenLabel = undefined;
+    }
+  } else if (highlightActive === true) {
+    // console.log("highlightActive was true");
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      // allNodes[nodeId].color = "purple";
+      allNodes[nodeId].color = nodeColors[nodeId];
+      // delete allNodes[nodeId].color;
+      if (allNodes[nodeId].hiddenLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].hiddenLabel;
+        allNodes[nodeId].hiddenLabel = undefined;
+      }
+    }
+    highlightActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    // console.log("Nothing was selected");
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        // allNodes[nodeId].color = {};
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function filterHighlight(params) {
+  allNodes = nodes.get({ returnType: "Object" });
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    filterActive = true;
+    let selectedNodes = params.nodes;
+
+    // hiding all nodes and saving the label
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = true;
+      if (allNodes[nodeId].savedLabel === undefined) {
+        allNodes[nodeId].savedLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+
+    for (let i=0; i < selectedNodes.length; i++) {
+      allNodes[selectedNodes[i]].hidden = false;
+      if (allNodes[selectedNodes[i]].savedLabel !== undefined) {
+        allNodes[selectedNodes[i]].label = allNodes[selectedNodes[i]].savedLabel;
+        allNodes[selectedNodes[i]].savedLabel = undefined;
+      }
+    }
+
+  } else if (filterActive === true) {
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = false;
+      if (allNodes[nodeId].savedLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].savedLabel;
+        allNodes[nodeId].savedLabel = undefined;
+      }
+    }
+    filterActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function selectNode(nodes) {
+  network.selectNodes(nodes);
+  neighbourhoodHighlight({ nodes: nodes });
+  return nodes;
+}
+
+function selectNodes(nodes) {
+  network.selectNodes(nodes);
+  filterHighlight({nodes: nodes});
+  return nodes;
+}
+
+function highlightFilter(filter) {
+  let selectedNodes = []
+  let selectedProp = filter['property']
+  if (filter['item'] === 'node') {
+    let allNodes = nodes.get({ returnType: "Object" });
+    for (let nodeId in allNodes) {
+      if (allNodes[nodeId][selectedProp] && filter['value'].includes((allNodes[nodeId][selectedProp]).toString())) {
+        selectedNodes.push(nodeId)
+      }
+    }
+  }
+  else if (filter['item'] === 'edge'){
+    let allEdges = edges.get({returnType: 'object'});
+    // check if the selected property exists for selected edge and select the nodes connected to the edge
+    for (let edge in allEdges) {
+      if (allEdges[edge][selectedProp] && filter['value'].includes((allEdges[edge][selectedProp]).toString())) {
+        selectedNodes.push(allEdges[edge]['from'])
+        selectedNodes.push(allEdges[edge]['to'])
+      }
+    }
+  }
+  selectNodes(selectedNodes)
+}</script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+            
+            
+            
+            
+            
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/css/tom-select.min.css" integrity="sha512-43fHB3GLgZfz8QXl1RPQ8O66oIgv3po9cJ5erMt1c4QISq9dYb195T3vr5ImnJPXuVroKcGBPXBFKETW8jrPNQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.0.0-rc.4/js/tom-select.complete.js" integrity="sha512-jeF9CfnvzDiw9G9xiksVjxR2lib44Gnovvkv+3CgCG6NXCD4gqlA5nDAVW5WjpA+i+/zKsUWV5xNEbW1X/HH0Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 1300px;
+                 height: 700px;
+                 background-color: #000000;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+                <div id="select-menu" class="card-header">
+                    <div class="row no-gutters">
+                        <div class="col-10 pb-2">
+                            <select
+                            class="form-select"
+                            aria-label="Default select example"
+                            onchange="selectNode([value]);"
+                            id="select-node"
+                            placeholder="Select node..."
+                            >
+                                <option selected>Select a Node by ID</option>
+                                
+                                    <option value="Frodo Baggins">Frodo Baggins</option>
+                                
+                                    <option value="Samwise Gamgee">Samwise Gamgee</option>
+                                
+                                    <option value="Bilbo Baggins">Bilbo Baggins</option>
+                                
+                                    <option value="Gandalf">Gandalf</option>
+                                
+                                    <option value="Gollum">Gollum</option>
+                                
+                                    <option value="Peregrin Took">Peregrin Took</option>
+                                
+                                    <option value="Boromir">Boromir</option>
+                                
+                                    <option value="Meriadoc Brandybuck">Meriadoc Brandybuck</option>
+                                
+                                    <option value="Faramir">Faramir</option>
+                                
+                                    <option value="Aragorn II Elessar">Aragorn II Elessar</option>
+                                
+                                    <option value="Tom Bombadil">Tom Bombadil</option>
+                                
+                                    <option value="Aragorn II">Aragorn II</option>
+                                
+                                    <option value="Elrond">Elrond</option>
+                                
+                                    <option value="Gimli">Gimli</option>
+                                
+                                    <option value="Saruman">Saruman</option>
+                                
+                                    <option value="Legolas">Legolas</option>
+                                
+                                    <option value="Glóin">Glóin</option>
+                                
+                                    <option value="Gildor">Gildor</option>
+                                
+                                    <option value="Lotho Sackville-Baggins">Lotho Sackville-Baggins</option>
+                                
+                                    <option value="Galadriel">Galadriel</option>
+                                
+                                    <option value="Sauron">Sauron</option>
+                                
+                                    <option value="Bill Ferny">Bill Ferny</option>
+                                
+                                    <option value="Gaffer Gamgee">Gaffer Gamgee</option>
+                                
+                                    <option value="Haldir">Haldir</option>
+                                
+                                    <option value="Barliman Butterbur">Barliman Butterbur</option>
+                                
+                                    <option value="Shagrat">Shagrat</option>
+                                
+                                    <option value="Shelob">Shelob</option>
+                                
+                                    <option value="Rosie Cotton">Rosie Cotton</option>
+                                
+                                    <option value="Ted Sandyman">Ted Sandyman</option>
+                                
+                                    <option value="Éowyn">Éowyn</option>
+                                
+                                    <option value="Treebeard">Treebeard</option>
+                                
+                                    <option value="Théoden">Théoden</option>
+                                
+                                    <option value="Éomer">Éomer</option>
+                                
+                                    <option value="Uglúk">Uglúk</option>
+                                
+                                    <option value="Beregond">Beregond</option>
+                                
+                                    <option value="Denethor II">Denethor II</option>
+                                
+                                    <option value="Shadowfax">Shadowfax</option>
+                                
+                                    <option value="Grishnákh">Grishnákh</option>
+                                
+                                    <option value="Arathorn">Arathorn</option>
+                                
+                                    <option value="Gríma Wormtongue">Gríma Wormtongue</option>
+                                
+                                    <option value="Nazgûl">Nazgûl</option>
+                                
+                                    <option value="Isildur">Isildur</option>
+                                
+                                    <option value="Radagast">Radagast</option>
+                                
+                                    <option value="Warden of the Houses of Healing">Warden of the Houses of Healing</option>
+                                
+                                    <option value="Thengel">Thengel</option>
+                                
+                                    <option value="Imrahil">Imrahil</option>
+                                
+                                    <option value="Éomund">Éomund</option>
+                                
+                                    <option value="Goldberry">Goldberry</option>
+                                
+                                    <option value="Gorbag">Gorbag</option>
+                                
+                                    <option value="Glorfindel">Glorfindel</option>
+                                
+                                    <option value="Celeborn">Celeborn</option>
+                                
+                                    <option value="Damrod">Damrod</option>
+                                
+                                    <option value="Mablung (ranger of Ithilien)">Mablung (ranger of Ithilien)</option>
+                                
+                                    <option value="Elladan">Elladan</option>
+                                
+                                    <option value="Elrohir">Elrohir</option>
+                                
+                            </select>
+                        </div>
+                        <div class="col-2 pb-2">
+                            <button type="button" class="btn btn-primary btn-block" onclick="neighbourhoodHighlight({nodes: []});">Reset Selection</button>
+                        </div>
+                    </div>
+                </div>
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+                  new TomSelect("#select-node",{
+                      create: false,
+                      sortField: {
+                          field: "text",
+                          direction: "asc"
+                      }
+                  });
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"font": {"color": "#ffffff"}, "group": 0, "id": "Frodo Baggins", "label": "Frodo Baggins", "shape": "dot", "size": 24}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Samwise Gamgee", "label": "Samwise Gamgee", "shape": "dot", "size": 21}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Bilbo Baggins", "label": "Bilbo Baggins", "shape": "dot", "size": 8}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Gandalf", "label": "Gandalf", "shape": "dot", "size": 24}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Gollum", "label": "Gollum", "shape": "dot", "size": 5}, {"font": {"color": "#ffffff"}, "group": 3, "id": "Peregrin Took", "label": "Peregrin Took", "shape": "dot", "size": 17}, {"font": {"color": "#ffffff"}, "group": 3, "id": "Boromir", "label": "Boromir", "shape": "dot", "size": 12}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Meriadoc Brandybuck", "label": "Meriadoc Brandybuck", "shape": "dot", "size": 17}, {"font": {"color": "#ffffff"}, "group": 3, "id": "Faramir", "label": "Faramir", "shape": "dot", "size": 11}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Aragorn II Elessar", "label": "Aragorn II Elessar", "shape": "dot", "size": 16}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Tom Bombadil", "label": "Tom Bombadil", "shape": "dot", "size": 3}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Aragorn II", "label": "Aragorn II", "shape": "dot", "size": 5}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Elrond", "label": "Elrond", "shape": "dot", "size": 6}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Gimli", "label": "Gimli", "shape": "dot", "size": 13}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Saruman", "label": "Saruman", "shape": "dot", "size": 14}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Legolas", "label": "Legolas", "shape": "dot", "size": 12}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Gl\u00f3in", "label": "Gl\u00f3in", "shape": "dot", "size": 2}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Gildor", "label": "Gildor", "shape": "dot", "size": 2}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Lotho Sackville-Baggins", "label": "Lotho Sackville-Baggins", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Galadriel", "label": "Galadriel", "shape": "dot", "size": 3}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Sauron", "label": "Sauron", "shape": "dot", "size": 6}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Bill Ferny", "label": "Bill Ferny", "shape": "dot", "size": 2}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Gaffer Gamgee", "label": "Gaffer Gamgee", "shape": "dot", "size": 3}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Haldir", "label": "Haldir", "shape": "dot", "size": 2}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Barliman Butterbur", "label": "Barliman Butterbur", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Shagrat", "label": "Shagrat", "shape": "dot", "size": 2}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Shelob", "label": "Shelob", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Rosie Cotton", "label": "Rosie Cotton", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Ted Sandyman", "label": "Ted Sandyman", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 5, "id": "\u00c9owyn", "label": "\u00c9owyn", "shape": "dot", "size": 4}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Treebeard", "label": "Treebeard", "shape": "dot", "size": 7}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Th\u00e9oden", "label": "Th\u00e9oden", "shape": "dot", "size": 8}, {"font": {"color": "#ffffff"}, "group": 5, "id": "\u00c9omer", "label": "\u00c9omer", "shape": "dot", "size": 11}, {"font": {"color": "#ffffff"}, "group": 3, "id": "Ugl\u00fak", "label": "Ugl\u00fak", "shape": "dot", "size": 3}, {"font": {"color": "#ffffff"}, "group": 3, "id": "Beregond", "label": "Beregond", "shape": "dot", "size": 3}, {"font": {"color": "#ffffff"}, "group": 3, "id": "Denethor II", "label": "Denethor II", "shape": "dot", "size": 4}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Shadowfax", "label": "Shadowfax", "shape": "dot", "size": 2}, {"font": {"color": "#ffffff"}, "group": 3, "id": "Grishn\u00e1kh", "label": "Grishn\u00e1kh", "shape": "dot", "size": 2}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Arathorn", "label": "Arathorn", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Gr\u00edma Wormtongue", "label": "Gr\u00edma Wormtongue", "shape": "dot", "size": 4}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Nazg\u00fbl", "label": "Nazg\u00fbl", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Isildur", "label": "Isildur", "shape": "dot", "size": 2}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Radagast", "label": "Radagast", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 3, "id": "Warden of the Houses of Healing", "label": "Warden of the Houses of Healing", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Thengel", "label": "Thengel", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 5, "id": "Imrahil", "label": "Imrahil", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 5, "id": "\u00c9omund", "label": "\u00c9omund", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Goldberry", "label": "Goldberry", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Gorbag", "label": "Gorbag", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 1, "id": "Glorfindel", "label": "Glorfindel", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 0, "id": "Celeborn", "label": "Celeborn", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 2, "id": "Damrod", "label": "Damrod", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 2, "id": "Mablung (ranger of Ithilien)", "label": "Mablung (ranger of Ithilien)", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 4, "id": "Elladan", "label": "Elladan", "shape": "dot", "size": 1}, {"font": {"color": "#ffffff"}, "group": 4, "id": "Elrohir", "label": "Elrohir", "shape": "dot", "size": 1}]);
+                  edges = new vis.DataSet([{"from": "Frodo Baggins", "to": "Samwise Gamgee", "value": 4648, "width": 1}, {"from": "Frodo Baggins", "to": "Bilbo Baggins", "value": 1153, "width": 1}, {"from": "Frodo Baggins", "to": "Gandalf", "value": 1057, "width": 1}, {"from": "Frodo Baggins", "to": "Gollum", "value": 860, "width": 1}, {"from": "Frodo Baggins", "to": "Peregrin Took", "value": 642, "width": 1}, {"from": "Frodo Baggins", "to": "Boromir", "value": 511, "width": 1}, {"from": "Frodo Baggins", "to": "Meriadoc Brandybuck", "value": 472, "width": 1}, {"from": "Frodo Baggins", "to": "Faramir", "value": 448, "width": 1}, {"from": "Frodo Baggins", "to": "Aragorn II Elessar", "value": 397, "width": 1}, {"from": "Frodo Baggins", "to": "Tom Bombadil", "value": 193, "width": 1}, {"from": "Frodo Baggins", "to": "Aragorn II", "value": 184, "width": 1}, {"from": "Frodo Baggins", "to": "Elrond", "value": 142, "width": 1}, {"from": "Frodo Baggins", "to": "Gimli", "value": 140, "width": 1}, {"from": "Frodo Baggins", "to": "Saruman", "value": 128, "width": 1}, {"from": "Frodo Baggins", "to": "Legolas", "value": 126, "width": 1}, {"from": "Frodo Baggins", "to": "Gl\u00f3in", "value": 125, "width": 1}, {"from": "Frodo Baggins", "to": "Gildor", "value": 124, "width": 1}, {"from": "Frodo Baggins", "to": "Lotho Sackville-Baggins", "value": 83, "width": 1}, {"from": "Frodo Baggins", "to": "Galadriel", "value": 81, "width": 1}, {"from": "Frodo Baggins", "to": "Sauron", "value": 65, "width": 1}, {"from": "Frodo Baggins", "to": "Bill Ferny", "value": 63, "width": 1}, {"from": "Frodo Baggins", "to": "Gaffer Gamgee", "value": 61, "width": 1}, {"from": "Frodo Baggins", "to": "Haldir", "value": 56, "width": 1}, {"from": "Frodo Baggins", "to": "Barliman Butterbur", "value": 54, "width": 1}, {"from": "Samwise Gamgee", "to": "Gollum", "value": 1210, "width": 1}, {"from": "Samwise Gamgee", "to": "Peregrin Took", "value": 636, "width": 1}, {"from": "Samwise Gamgee", "to": "Meriadoc Brandybuck", "value": 484, "width": 1}, {"from": "Samwise Gamgee", "to": "Gandalf", "value": 464, "width": 1}, {"from": "Samwise Gamgee", "to": "Faramir", "value": 297, "width": 1}, {"from": "Samwise Gamgee", "to": "Bilbo Baggins", "value": 253, "width": 1}, {"from": "Samwise Gamgee", "to": "Aragorn II Elessar", "value": 252, "width": 1}, {"from": "Samwise Gamgee", "to": "Shagrat", "value": 204, "width": 1}, {"from": "Samwise Gamgee", "to": "Bill Ferny", "value": 185, "width": 1}, {"from": "Samwise Gamgee", "to": "Galadriel", "value": 133, "width": 1}, {"from": "Samwise Gamgee", "to": "Boromir", "value": 133, "width": 1}, {"from": "Samwise Gamgee", "to": "Shelob", "value": 127, "width": 1}, {"from": "Samwise Gamgee", "to": "Elrond", "value": 111, "width": 1}, {"from": "Samwise Gamgee", "to": "Aragorn II", "value": 106, "width": 1}, {"from": "Samwise Gamgee", "to": "Gimli", "value": 103, "width": 1}, {"from": "Samwise Gamgee", "to": "Legolas", "value": 103, "width": 1}, {"from": "Samwise Gamgee", "to": "Sauron", "value": 98, "width": 1}, {"from": "Samwise Gamgee", "to": "Rosie Cotton", "value": 90, "width": 1}, {"from": "Samwise Gamgee", "to": "Ted Sandyman", "value": 89, "width": 1}, {"from": "Samwise Gamgee", "to": "Gaffer Gamgee", "value": 78, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Peregrin Took", "value": 1392, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Gandalf", "value": 267, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Aragorn II Elessar", "value": 254, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "\u00c9owyn", "value": 200, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Treebeard", "value": 196, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Th\u00e9oden", "value": 189, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Saruman", "value": 160, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Legolas", "value": 154, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Gimli", "value": 140, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "\u00c9omer", "value": 118, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Boromir", "value": 117, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Bilbo Baggins", "value": 92, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Ugl\u00fak", "value": 89, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Tom Bombadil", "value": 82, "width": 1}, {"from": "Meriadoc Brandybuck", "to": "Aragorn II", "value": 82, "width": 1}, {"from": "Peregrin Took", "to": "Gandalf", "value": 905, "width": 1}, {"from": "Peregrin Took", "to": "Beregond", "value": 269, "width": 1}, {"from": "Peregrin Took", "to": "Denethor II", "value": 245, "width": 1}, {"from": "Peregrin Took", "to": "Treebeard", "value": 203, "width": 1}, {"from": "Peregrin Took", "to": "Faramir", "value": 172, "width": 1}, {"from": "Peregrin Took", "to": "Gimli", "value": 147, "width": 1}, {"from": "Peregrin Took", "to": "Ugl\u00fak", "value": 125, "width": 1}, {"from": "Peregrin Took", "to": "Boromir", "value": 121, "width": 1}, {"from": "Peregrin Took", "to": "Aragorn II Elessar", "value": 107, "width": 1}, {"from": "Peregrin Took", "to": "Shadowfax", "value": 102, "width": 1}, {"from": "Peregrin Took", "to": "Saruman", "value": 94, "width": 1}, {"from": "Peregrin Took", "to": "Grishn\u00e1kh", "value": 92, "width": 1}, {"from": "Peregrin Took", "to": "Legolas", "value": 89, "width": 1}, {"from": "Peregrin Took", "to": "Bilbo Baggins", "value": 89, "width": 1}, {"from": "Aragorn II", "to": "Aragorn II Elessar", "value": 1327, "width": 1}, {"from": "Aragorn II", "to": "Gandalf", "value": 68, "width": 1}, {"from": "Aragorn II Elessar", "to": "Legolas", "value": 350, "width": 1}, {"from": "Aragorn II Elessar", "to": "Gandalf", "value": 268, "width": 1}, {"from": "Aragorn II Elessar", "to": "Boromir", "value": 236, "width": 1}, {"from": "Aragorn II Elessar", "to": "\u00c9omer", "value": 210, "width": 1}, {"from": "Aragorn II Elessar", "to": "Gimli", "value": 209, "width": 1}, {"from": "Aragorn II Elessar", "to": "Faramir", "value": 106, "width": 1}, {"from": "Aragorn II Elessar", "to": "Treebeard", "value": 72, "width": 1}, {"from": "Aragorn II Elessar", "to": "Th\u00e9oden", "value": 67, "width": 1}, {"from": "Aragorn II Elessar", "to": "Arathorn", "value": 65, "width": 1}, {"from": "Aragorn II Elessar", "to": "Saruman", "value": 59, "width": 1}, {"from": "Aragorn II Elessar", "to": "Elrond", "value": 58, "width": 1}, {"from": "Gimli", "to": "Legolas", "value": 1249, "width": 1}, {"from": "Gimli", "to": "Gandalf", "value": 362, "width": 1}, {"from": "Gimli", "to": "Treebeard", "value": 170, "width": 1}, {"from": "Gimli", "to": "\u00c9omer", "value": 157, "width": 1}, {"from": "Gimli", "to": "Gl\u00f3in", "value": 143, "width": 1}, {"from": "Gimli", "to": "Boromir", "value": 132, "width": 1}, {"from": "Gimli", "to": "Saruman", "value": 117, "width": 1}, {"from": "Gimli", "to": "Sauron", "value": 64, "width": 1}, {"from": "Legolas", "to": "Gandalf", "value": 337, "width": 1}, {"from": "Legolas", "to": "Treebeard", "value": 165, "width": 1}, {"from": "Legolas", "to": "Boromir", "value": 146, "width": 1}, {"from": "Legolas", "to": "\u00c9omer", "value": 120, "width": 1}, {"from": "Legolas", "to": "Haldir", "value": 110, "width": 1}, {"from": "Legolas", "to": "Saruman", "value": 61, "width": 1}, {"from": "Gollum", "to": "Bilbo Baggins", "value": 296, "width": 1}, {"from": "Gollum", "to": "Faramir", "value": 143, "width": 1}, {"from": "Gollum", "to": "Gandalf", "value": 77, "width": 1}, {"from": "Bilbo Baggins", "to": "Gandalf", "value": 487, "width": 1}, {"from": "Bilbo Baggins", "to": "Elrond", "value": 73, "width": 1}, {"from": "Bilbo Baggins", "to": "Gaffer Gamgee", "value": 54, "width": 1}, {"from": "Gandalf", "to": "Saruman", "value": 495, "width": 1}, {"from": "Gandalf", "to": "Boromir", "value": 341, "width": 1}, {"from": "Gandalf", "to": "Th\u00e9oden", "value": 321, "width": 1}, {"from": "Gandalf", "to": "Faramir", "value": 301, "width": 1}, {"from": "Gandalf", "to": "Denethor II", "value": 294, "width": 1}, {"from": "Gandalf", "to": "Shadowfax", "value": 276, "width": 1}, {"from": "Gandalf", "to": "Treebeard", "value": 230, "width": 1}, {"from": "Gandalf", "to": "Gr\u00edma Wormtongue", "value": 213, "width": 1}, {"from": "Gandalf", "to": "\u00c9omer", "value": 183, "width": 1}, {"from": "Gandalf", "to": "Sauron", "value": 138, "width": 1}, {"from": "Gandalf", "to": "Elrond", "value": 127, "width": 1}, {"from": "Gandalf", "to": "Beregond", "value": 108, "width": 1}, {"from": "Gandalf", "to": "Nazg\u00fbl", "value": 72, "width": 1}, {"from": "Gandalf", "to": "Gildor", "value": 63, "width": 1}, {"from": "Boromir", "to": "Faramir", "value": 251, "width": 1}, {"from": "Boromir", "to": "Denethor II", "value": 170, "width": 1}, {"from": "Boromir", "to": "Isildur", "value": 64, "width": 1}, {"from": "Boromir", "to": "Saruman", "value": 56, "width": 1}, {"from": "Saruman", "to": "Gr\u00edma Wormtongue", "value": 184, "width": 1}, {"from": "Saruman", "to": "Treebeard", "value": 128, "width": 1}, {"from": "Saruman", "to": "Sauron", "value": 104, "width": 1}, {"from": "Saruman", "to": "Radagast", "value": 85, "width": 1}, {"from": "Saruman", "to": "\u00c9omer", "value": 83, "width": 1}, {"from": "Saruman", "to": "Th\u00e9oden", "value": 81, "width": 1}, {"from": "Faramir", "to": "Denethor II", "value": 317, "width": 1}, {"from": "Faramir", "to": "\u00c9owyn", "value": 176, "width": 1}, {"from": "Faramir", "to": "Beregond", "value": 95, "width": 1}, {"from": "Faramir", "to": "Warden of the Houses of Healing", "value": 59, "width": 1}, {"from": "Th\u00e9oden", "to": "\u00c9omer", "value": 254, "width": 1}, {"from": "Th\u00e9oden", "to": "Gr\u00edma Wormtongue", "value": 146, "width": 1}, {"from": "Th\u00e9oden", "to": "\u00c9owyn", "value": 64, "width": 1}, {"from": "Th\u00e9oden", "to": "Thengel", "value": 54, "width": 1}, {"from": "\u00c9omer", "to": "\u00c9owyn", "value": 198, "width": 1}, {"from": "\u00c9omer", "to": "Gr\u00edma Wormtongue", "value": 86, "width": 1}, {"from": "\u00c9omer", "to": "Imrahil", "value": 82, "width": 1}, {"from": "\u00c9omer", "to": "\u00c9omund", "value": 65, "width": 1}, {"from": "Goldberry", "to": "Tom Bombadil", "value": 227, "width": 1}, {"from": "Shagrat", "to": "Gorbag", "value": 172, "width": 1}, {"from": "Elrond", "to": "Glorfindel", "value": 67, "width": 1}, {"from": "Sauron", "to": "Isildur", "value": 104, "width": 1}, {"from": "Galadriel", "to": "Celeborn", "value": 105, "width": 1}, {"from": "Ugl\u00fak", "to": "Grishn\u00e1kh", "value": 120, "width": 1}, {"from": "Damrod", "to": "Mablung (ranger of Ithilien)", "value": 59, "width": 1}, {"from": "Elladan", "to": "Elrohir", "value": 54, "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+                    network.on("selectNode", neighbourhoodHighlight);
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
