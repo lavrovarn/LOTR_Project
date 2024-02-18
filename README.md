@@ -115,15 +115,15 @@ The character network analysis revealed six distinct communities, each comprisin
 
 ### Characters' importance over time 
 
-**All Cahracters**
+**All Characters**
 
 ![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/books_degree_centrality.png "books_degree_centrality") 
 
-**Positiv Cahracters**
+**Positive Characters**
 
 ![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/books_positiv_degree_centrality.png "books_positiv_degree_centrality") 
 
-**Negativ Cahracters**
+**Negative Characters**
 
 ![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/books_negativ_degree_centrality.png "books_negativ_degree_centrality") 
 
