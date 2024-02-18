@@ -2,7 +2,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
 #files
 etc/
 Include/
@@ -14,7 +13,7 @@ characters_list.csv
 characters.csv
 lord_of_rings_comminities.html
 lord_of_rings.html
-
+readme_old.txt
 
 # C extensions
 *.so

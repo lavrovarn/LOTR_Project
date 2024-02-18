@@ -7,9 +7,13 @@ import spacy
 import os
 import networkx as nx 
 
-from selenium import webdriver 
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+#from selenium import webdriver 
+#from selenium.webdriver.chrome.service import Service
+#from webdriver_manager.chrome import ChromeDriverManager
+#from selenium.webdriver.chrome.service import Service as ChromeService
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
@@ -30,12 +34,14 @@ def download_characters_from_web(page_urls):
     
     
     # Create driver
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-
+    #driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    #driver = webdriver.Chrome(executable_path=ChromeDriverManager(version="109.0.5414.74").install())
+    service = webdriver.ChromeService()
+    driver = webdriver.Chrome(service=service)
+    
     # Initialize lists to store character and book data
     characters_list = [] # List with book's key and name 
     books_list=[] # List of dictionaries with book data
-    book_character_list=[] # List of dictionaries with book-character relationship data
     
     # Initialize book and character indices
     book_index=0
@@ -45,9 +51,9 @@ def download_characters_from_web(page_urls):
     for page_url in page_urls: 
         # Load the web page
         driver.get(page_url)
-
+        time.sleep(3)
         # Handle cookie pop-up if present
-        cookie_buttons = driver.find_elements(By.XPATH, '//div[text()="ANNEHMEN"]')
+        cookie_buttons = driver.find_elements(By.XPATH, '//div[text()="ALLE AKZEPTIEREN"]')
         if len(cookie_buttons) > 0:
             cookie_buttons[0].click()
         
@@ -93,6 +99,15 @@ def download_characters_from_web(page_urls):
                     other_names=other_names_str.split("; ")
                 except NoSuchElementException:
                     other_names=[]
+                    
+                # get race
+                try:
+                    # Extract other names for the character
+                    race_section=driver.find_element(By.XPATH, '//div[@data-source="race"]')
+                    race_str=race_section.find_element(By.CLASS_NAME, 'pi-data-value').text
+               
+                except NoSuchElementException:
+                    race_str=''
                 
                 # Close the character's web page
                 driver.close()
@@ -101,27 +116,21 @@ def download_characters_from_web(page_urls):
                 driver.switch_to.window(driver.window_handles[0])        
          
                 # Add the character to the characters list and the book-character list
-                characters_list.append({
-                    "character_key": character_index,
-                    "character_name": character_name,
-                    "character_firstname": character_name.split(' ', 1)[0],
-                    "other_names": other_names,
-                    "character_url": character_url
-                })
-                book_character_list.append({
-                    "book_key": book_index, 
-                    "character_key": character_index,
-                    "add_info": character_add_info
-                })
-                character_index=character_index+1
-            else: 
-                book_character_list.append({
-                    "book_key": book_index, 
-                    "character_key": next(item for item in characters_list if item["character_name"] ==character_name)["character_key"], 
-                    "add_info": character_add_info
-                })
+            
+                if character_name == 'Sméagol' and (next((item for item in characters_list if item["character_name"] =='Gollum'), None))!=None: 
+                    gollumn_item=next(item for item in characters_list if item["character_name"] =='Gollum')
+                    gollumn_item['other_names'].append('Sméagol')
+                else:
+                    characters_list.append({
+                        "character_key": character_index,
+                        "character_name": character_name,
+                        "character_firstname": character_name.split(' ', 1)[0],
+                        "other_names": other_names,
+                        "race": race_str,
+                        "character_url": character_url
+                    })
+                    character_index=character_index+1                
 
-                
         books_list.append({"key": book_index, "name": book_name})
         book_index=book_index+1
        
@@ -149,7 +158,8 @@ def compare_two_sources(characters_list_df, page_url):
     pd.DataFrame: a dataframe containing all the characters from both sources
     """
     #get all characters from book
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    service = webdriver.ChromeService()
+    driver = webdriver.Chrome(service=service)
     driver.get(page_url)
 
     #list with characters from second source 
@@ -168,9 +178,8 @@ def compare_two_sources(characters_list_df, page_url):
     last_index_of_df=characters_list_df['character_key'].tail(1).index[0]
     for i, item in enumerate(book_characters):
         if item["character_name"] not in list(characters_list_df.character_name) and item["character_name"].split(' ', 1)[0] not in list(characters_list_df.character_firstname):
-            print(item["character_name"])
             last_index_of_df=last_index_of_df+1
-            characters_list_df.loc[len(characters_list_df.index)] = [last_index_of_df, item["character_name"], item["character_name"].split(' ', 1)[0], [], item["character_url"]]
+            characters_list_df.loc[len(characters_list_df.index)] = [last_index_of_df, item["character_name"], item["character_name"].split(' ', 1)[0], [], "", item["character_url"]]
             book_characters_unique.append(item)
     driver.close()    
     return characters_list_df
