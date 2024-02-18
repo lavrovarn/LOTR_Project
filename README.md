@@ -11,13 +11,12 @@ I would like to express my gratitude to [Thu Vu Data Analytics](https://www.yout
 ## Project Overview
 The project comprises several key steps:
 
-1. Data Collection: Scraping character data from "The Lord of the Rings" movies and books from reputable sources.
+1. Data Collection: Scraping character data from "The Lord of the Rings" movies and books from reputable sources. Because many characters have multiple names, for example Aragorn is also known as Strider and Elessar, I also stored the other names from the personal page of each character. Some characters don't appear in the movies, so I compared the characters from the films with a list of characters from tolkiengateway.net to ensure that all unique characters were included in the dataset.
 - [The Lord of the Rings: The Fellowship of the Ring ](https://lotr.fandom.com/wiki/The_Lord_of_the_Rings:_The_Fellowship_of_the_Ring)
 - [The Lord of the Rings: The Two Towers](https://lotr.fandom.com/wiki/The_Lord_of_the_Rings:_The_Two_Towers)
 -  [The Lord of the Rings: The Return of the King](https://lotr.fandom.com/wiki/The_Lord_of_the_Rings:_The_Return_of_the_King)
 -  [Category:Characters in The Lord of the Rings
 ](https://tolkiengateway.net/wiki/Category:Characters_in_The_Lord_of_the_Rings)
-Because many characters have multiple names, for example Aragorn is also known as Strider and Elessar, I also stored the other names from the personal page of each character. Some characters don't appear in the movies, so I compared the characters from the films with a list of characters from tolkiengateway.net to ensure that all unique characters were included in the dataset.
 2. Relationship Extraction: Analyzing the text of the trilogy to extract relationships between characters based on their co-occurrence and interactions.
 3. Network Visualization: Constructing a graphical representation of the character network using NetworkX, allowing for intuitive visualization of character connections.
 4. Community Detection: Employing community detection algorithms to identify cohesive groups of characters within the network.
@@ -40,7 +39,8 @@ I scraped character data from multiple sources, ensuring comprehensive coverage 
 To make the graph more readable, I decided to limit the number of nodes by only including the first 150 rows of the dataset. The dataset was also filtered by the value of the relationships in descending order, so that only the most significant relationships were included in the graph.
 
 Here is the result: 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1") 
+
+![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/graph_lotr.png "Graph_LOTR") 
 
 The visualizations generated using pandas can be challenging to interpret, particularly when attempting to identify dependencies between characters. Therefore, to address this limitation and create more intuitive network visualizations, I opted to utilize Pyvis Network, a powerful tool specifically designed for network analysis and visualization.
 
@@ -52,7 +52,8 @@ Here is the link to dynamic graphs visualisation: [Network](https://tolkiengatew
 
 Based on the degree centrality values, we can draw several insights about the characters' importance within the network:
 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1") 
+![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/degree_centrality_desc.png "Highest Degree Centrality") 
+![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/degree_centrality_acs.png "Lowest Degree Centrality") 
 
 1. **Frodo Baggins** and **Gandalf** have the highest degree centrality, indicating that they are the most central characters in terms of relationships with other characters. This suggests that they play significant roles and have strong connections with various characters throughout the story.
 
