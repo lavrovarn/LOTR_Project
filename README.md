@@ -45,8 +45,10 @@ Here is the result:
 The visualizations generated using pandas can be challenging to interpret, particularly when attempting to identify dependencies between characters. Therefore, to address this limitation and create more intuitive network visualizations, I opted to utilize Pyvis Network, a powerful tool specifically designed for network analysis and visualization.
 
 ### Network 
+Preview to the dynamic graphs visualisation: 
+![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/lord_of_rings_preview.png "lord_of_rings_preview") 
 
-Here is the link to dynamic graphs visualisation: [Network](https://tolkiengateway.net/wiki/Category:Characters_in_The_Lord_of_the_Rings)
+You can download the html-file hier: [Network](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/lord_of_rings_comminities.html)
 
 ### Insights Based on Characters Network Degree
 
@@ -71,7 +73,10 @@ Based on the degree centrality values, we can draw several insights about the ch
 ### Communities
 I used communities to identify groups of characters within the network who share common characteristics or have similar roles or relationships in the story.  I used the community_louvain package to identify the communities within the LOTR character network. 
 
-Here is the link to dynamic graphs visualisation: [Communities Network](https://tolkiengateway.net/wiki/Category:Characters_in_The_Lord_of_the_Rings)
+Preview to the dynamic graphs visualisation: 
+![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/lord_of_rings_comminities_preview.png "lord_of_rings_comminities_preview") 
+
+You can download the html-file hier: [Network](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/lord_of_rings_comminities.html)
 
 The character network analysis revealed six distinct communities, each comprising characters with close affiliations and interactions. Based on the communities extracted from the characters network, here are some insights for each community:
 
@@ -104,6 +109,15 @@ The character network analysis revealed six distinct communities, each comprisin
 - The presence of characters like Saruman and Gríma Wormtongue suggests a connection to the political and strategic aspects of the war effort.
 
 ### Characters' importance over time 
+
+**All Cahracters**
+![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/books_degree_centrality.png "books_degree_centrality") 
+
+**Positiv Cahracters**
+![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/books_positiv_degree_centrality.png "books_positiv_degree_centrality") 
+
+**Negativ Cahracters**
+![alt text](https://github.com/lavrovarn/LOTR_Project/blob/main/graphs/books_negativ_degree_centrality.png "books_negativ_degree_centrality") 
 
 It seems that Frodo and Sam have similar patterns in terms of their degree centrality throughout the books, while Aragorn and Gandalf also have a similar pattern.
 
